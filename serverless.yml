@@ -1,0 +1,68 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: wdevelopers
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: swapi
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: reto-swapi
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:Get*"
+        - "dynamodb:Scan*"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-swapiTable-${sls:stage}
+  environment:
+    DYNAMO_SWAPI_TABLE: ${self:service}-swapiTable-${sls:stage}
+    SWAPI_ENDOINT: https://swapi.py4e.com/api/
+
+functions:
+  addPadawan:
+    handler: addPadawan.addPadawan
+    events:
+      - httpApi:
+          path: /addPadawan
+          method: post
+  getPadawan:
+    handler: getPadawan.getPadawan
+    events:
+      - httpApi:
+          path: /getPadawan
+          method: get
+      - httpApi:
+          path: /getPadawan/{param}
+          method: get
+  getSwapi:
+    handler: getSwapi.getSwapi
+    events:
+      - httpApi:
+          path: /getSwapi
+          method: get
+      - httpApi:
+          path: /getSwapi/{resource}
+          method: get
+      - httpApi:
+          path: /getSwapi/{resource}/{param}
+          method: get
+
+resources:
+  Resources:
+    SwapiTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-swapiTable-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+plugins:
+  - serverless-openapi-documentation
