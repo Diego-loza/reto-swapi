@@ -19,17 +19,17 @@ provider:
       Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-swapiTable-${sls:stage}
   environment:
     DYNAMO_SWAPI_TABLE: ${self:service}-swapiTable-${sls:stage}
-    SWAPI_ENDOINT: https://swapi.py4e.com/api/
+    SWAPI_ENDPOINT: https://swapi.py4e.com/api/
 
 functions:
-  addPadawan:
-    handler: addPadawan.addPadawan
+  createPadawan:
+    handler: src/handlers/CreatePadawan.handler
     events:
       - httpApi:
-          path: /addPadawan
+          path: /createPadawan
           method: post
   getPadawan:
-    handler: getPadawan.getPadawan
+    handler: src/handlers/GetPadawan.handler
     events:
       - httpApi:
           path: /getPadawan
@@ -38,7 +38,7 @@ functions:
           path: /getPadawan/{param}
           method: get
   getSwapi:
-    handler: getSwapi.getSwapi
+    handler: src/handlers/GetSwapi.handler
     events:
       - httpApi:
           path: /getSwapi
